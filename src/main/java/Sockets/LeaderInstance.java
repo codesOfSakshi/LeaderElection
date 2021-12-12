@@ -1,3 +1,5 @@
+package Sockets;
+
 public class LeaderInstance {
 
     private static LeaderInstance leaderInstance = null;

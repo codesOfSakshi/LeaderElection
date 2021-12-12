@@ -5,17 +5,21 @@ public class LeaderInstance {
 
 
 
-    private LeaderInstance(String ip) {
-        LeaderIpAddress = ip;
-    }
-
-    public static void setInstance(String Ip)
+    public static LeaderInstance getInstance()
     {
+        if(leaderInstance==null)
+       leaderInstance = new LeaderInstance();
 
-       leaderInstance = new LeaderInstance(Ip);
+        return leaderInstance;
 
     }
-    public static String getInstance()
+
+    public   void setLeaderIp(String Ip)
+    {
+        LeaderIpAddress= Ip;
+    }
+
+    public  String getLeaderIp()
     {
         return LeaderIpAddress;
     }

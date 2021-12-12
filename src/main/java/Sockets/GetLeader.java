@@ -1,6 +1,8 @@
 package Sockets;
 
-import java.io.*;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -14,7 +16,7 @@ public class GetLeader {
         OutputStream outputStream = socket.getOutputStream();
         DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
         System.out.println("Sending string to the ServerSocket");
-        String leaderIp =LeaderInstance.getInstance().getLeaderIp();
+        String leaderIp = Sockets.LeaderInstance.getInstance().getLeaderIp();
         if(leaderIp==null)
               leaderIp="No Ip Set";
         dataOutputStream.writeUTF(leaderIp);

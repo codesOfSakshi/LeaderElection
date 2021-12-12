@@ -16,9 +16,17 @@ public class LeaderInstance {
 
     }
 
-    public   void setLeaderIp(String Ip)
+    public static void triggerRelection() {
+        String newLeader=(String) Server.BrokerIps.get(0);
+        setLeaderIp((String) Server.BrokerIps.get(0));
+    }
+
+    public static void setLeaderIp(String Ip)
     {
         LeaderIpAddress= Ip;
+        System.out.println("----------------------");
+        System.out.println("The new leader is : "+Ip);
+        System.out.println("----------------------");
     }
 
     public  String getLeaderIp()

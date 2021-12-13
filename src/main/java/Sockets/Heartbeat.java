@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static Sockets.LeaderInstance.triggerRelection;
+import static Sockets.Server.triggerRelection;
 
 
 public class Heartbeat extends Thread {
@@ -27,17 +27,19 @@ public class Heartbeat extends Thread {
 
     public void Receive()
     {
+
+        InetSocketAddress socketAddress = (InetSocketAddress) _socket.getRemoteSocketAddress();
+        String clientIpAddress = socketAddress.getAddress().getHostAddress();
         if(_input != null) {
             try {
                 String in = "";
-                while("reply".equals(in)) {
+
                     in = this._input.readUTF();
                     System.out.println(in);
-                    String[] receivedOffests= in.split(":");
-                    if(receivedOffests[0].equals(Sockets.LeaderInstance.getInstance().getLeaderIp())) {
-                        offset = receivedOffests[1];
+                    if(clientIpAddress.equals(Server.leaderIp)) {
+                        offset = in;
                     }
-                }
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -50,7 +52,7 @@ public class Heartbeat extends Thread {
         {
             try {
                 System.out.print("Sending heartbeat\n");
-                _output.writeUTF("heartbeat");
+                _output.writeUTF("false"+" "+null);
                 Receive();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -76,7 +78,14 @@ public class Heartbeat extends Thread {
                     {
                         try {
                             System.out.print("Sending heartbeat\n");
-                            _output.writeUTF("heartbeat:"+offset);
+                            Boolean isLeader= Server.leaderIp.equals(clientIpAddress);
+                            if(isLeader){
+                                String flag = "true";
+                            }
+                            else{
+                                String flag = "false";
+                            }
+                            _output.writeUTF(flag+" "+offset);
                             Receive();
                         } catch (IOException e) {
                             c+=1;
@@ -96,9 +105,14 @@ public class Heartbeat extends Thread {
                                 //removing the server from broker list
                                 Sockets.Server.BrokerIps.remove(clientIpAddress);
                                 //checking if the server that has gone down is the leader
-                                if(Sockets.LeaderInstance.getInstance().getLeaderIp().equals(clientIpAddress)) {
+
+                                if(Sockets.Server.leaderIp.equals(clientIpAddress)) {
                                     System.out.println("Re-election triggered");
-                                    triggerRelection();
+                                    try {
+                                        triggerRelection();
+                                    } catch (IOException ex) {
+                                        ex.printStackTrace();
+                                    }
                                 }
                                 else{
                                     System.out.println("Broker was not leader.Re-election not required");

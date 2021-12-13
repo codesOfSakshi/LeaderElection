@@ -1,14 +1,10 @@
 package Sockets;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Timer;
 
 
@@ -20,11 +16,45 @@ public class Server {
     private DataInputStream _input;
     private DataOutputStream _output;
     private Timer _timer;
-    public static ArrayList<String> BrokerIps= new ArrayList();
+    public static ArrayList BrokerIps= new ArrayList();
+    public static String leaderIp;
+    boolean flag=false;
 
     boolean SendHeartbeat()
     {
         return true;
+    }
+
+
+    public static void triggerRelection() throws IOException {
+        leaderIp=(String) BrokerIps.get(0);
+        System.out.println("----------------------");
+        System.out.println("Leader Broker : "+ leaderIp);
+        System.out.println("----------------------");
+        updatePropertyFile();
+    }
+
+    public static void writeLeader(String leader){
+        leaderIp = leader;
+    }
+
+    public static void updatePropertyFile() throws IOException {
+        String mycontent = leaderIp +" pop "+ BrokerIps.toString();
+        //Specify the file name and path here
+        File file = new File("zookeeper.txt");
+        System.out.println("creating new file");
+
+        if (!file.exists()) {
+            file.createNewFile();
+            System.out.println("creating new file");
+        }
+
+        System.out.println("creating new file");
+
+        FileWriter fw = new FileWriter(file);
+        BufferedWriter bw = new BufferedWriter(fw);
+        bw.write(mycontent);
+        bw.close();
     }
 
     void ReceiveData() throws IOException {
@@ -44,9 +74,6 @@ public class Server {
 
 
     public Server(int port) throws IOException {
-        BrokerIps.add("1.2.3.4");
-        BrokerIps.add("5.6.3.4");
-        boolean flag=false;
         this._server = new ServerSocket(port);
         System.out.print("[Server] Waiting for client...\n");
         while(true) {
@@ -59,8 +86,12 @@ public class Server {
             System.out.println("New broker has registered itself : "+ BrokerIps);
             System.out.println("----------------------");
             if(flag==false){
-                Sockets.LeaderInstance.setLeaderIp(clientIpAddress);
+                leaderIp=clientIpAddress;
+                System.out.println("----------------------");
+                System.out.println("Leader Broker : "+ leaderIp);
+                System.out.println("----------------------");
                 flag=true;
+                updatePropertyFile();
             }
             new Thread(new Task(this._socket)).start();
 
@@ -112,7 +143,7 @@ public class Server {
             this._output = new DataOutputStream(socket.getOutputStream());
             Heartbeat heartbeat = new Heartbeat(socket, _output, _input);
             heartbeat.start();
-//            server.ReceiveData();
+            server.ReceiveData();
             socket.close();
         }
 

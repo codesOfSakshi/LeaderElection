@@ -18,20 +18,29 @@ public class Server {
     private Timer _timer;
     public static ArrayList BrokerIps= new ArrayList();
     public static String leaderIp;
-    boolean flag=false;
+    static boolean flag=false;
+    public static String offset=null;
 
     boolean SendHeartbeat()
     {
         return true;
     }
 
-
     public static void triggerRelection() throws IOException {
-        leaderIp=(String) BrokerIps.get(0);
-        System.out.println("----------------------");
-        System.out.println("Leader Broker : "+ leaderIp);
-        System.out.println("----------------------");
-        updatePropertyFile();
+        if(BrokerIps.size()>=1) {
+            leaderIp = (String) BrokerIps.get(0);
+            System.out.println("----------------------");
+            System.out.println("Leader Broker : " + leaderIp);
+            System.out.println("----------------------");
+            updatePropertyFile();
+        }
+        else{
+
+            System.out.println("----------------------");
+            System.out.println("System is completely down no healthy Broker to become leader.Waiting for new Broker");
+            System.out.println("----------------------");
+            Server.flag=false;
+        }
     }
 
     public static void writeLeader(String leader){
@@ -78,6 +87,7 @@ public class Server {
         System.out.print("[Server] Waiting for client...\n");
         while(true) {
             this._socket = this._server.accept();
+            updatePropertyFile();
             //Broker gets itself registered with the server
             InetSocketAddress socketAddress = (InetSocketAddress) this._socket.getRemoteSocketAddress();
             String clientIpAddress = socketAddress.getAddress().getHostAddress();

@@ -20,7 +20,6 @@ public class Heartbeat extends Thread {
     private float _nextHeartbeat = 0.0f;
     private boolean _isAlive = true;
     private Timer _timer = null;
-    String offset=null;
 
     static final int MINUTE = 5 * 1000; // 1 second in ms * 60
 
@@ -37,7 +36,7 @@ public class Heartbeat extends Thread {
                     in = this._input.readUTF();
                     System.out.println(in);
                     if(clientIpAddress.equals(Server.leaderIp)) {
-                        offset = in;
+                        Server.offset = in;
                     }
 
             } catch (IOException e) {
@@ -79,13 +78,11 @@ public class Heartbeat extends Thread {
                         try {
                             System.out.print("Sending heartbeat\n");
                             Boolean isLeader= Server.leaderIp.equals(clientIpAddress);
+                            String flag="true";
                             if(isLeader){
-                                String flag = "true";
+                                flag = "false";
                             }
-                            else{
-                                String flag = "false";
-                            }
-                            _output.writeUTF(flag+" "+offset);
+                            _output.writeUTF(flag+" "+Server.offset);
                             Receive();
                         } catch (IOException e) {
                             c+=1;

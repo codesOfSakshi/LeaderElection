@@ -10,6 +10,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import static Sockets.Server.triggerRelection;
+import static Sockets.Server.updatePropertyFile;
 
 
 public class Heartbeat extends Thread {
@@ -78,6 +79,7 @@ public class Heartbeat extends Thread {
                         try {
                             System.out.print("Sending heartbeat\n");
                             Boolean isLeader= Server.leaderIp.equals(clientIpAddress);
+                            updatePropertyFile();
                             String flag="true";
                             if(isLeader){
                                 flag = "false";
